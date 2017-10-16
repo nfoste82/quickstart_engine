@@ -1,0 +1,553 @@
+Changelog:
+
+Known bugs:
+- (Since v0.27), cone physics do not have an accurate center of mass. Giving them a center
+  of mass that is accurate means that their origin position (0, 0, 0) does not actually touch
+  the cone, causing it to float at a height that is different from every other physics type.
+- (Since v0.24), meshes using the 'NormalMapSpecular.fx' effect file will not receive
+  fog properly when underwater.
+- (Since v0.22), shadows from self-shadowing have jagged edges. This is from Microsoft's
+  XNA Shadow sample, their sample exhibits the same problem. I'd fix it if I was a
+  graphics programmer and/or knew how. :)
+- (Since v0.21), if the camera has rolled (using the Q or E keys in the demo), water
+  reflections can end up incorrect.
+- Some particles are darker when any part of a plane of water is in view.
+- When underwater and against a slope characters can occasionally fall through the terrain
+  physics.
+
+======================================================================================
+Changes in v0.27 (from previous version 0.263)
+
+Bugs fixed:
+- Physics entities should no longer be able to move through static physics entities in
+  certain cases. For example if you shot a sphere at the top of the space ship in the demo
+  you could have the ball go through the ship.
+- Fixed bug that would allow some raycasts to go through the terrain.
+- Particle color no longer affects the transparency of the water reflections.
+
+Performance improvements:
+- Using physics debug view no longer kills the framerate when triangle mesh shapes are
+  in view (like the space ship).
+
+Features:
+- Improved water shader. Prior to this version all water was perfectly clear
+  and had no light scattering, so all you really saw was extremely shiny reflections and hardly
+  anything under the water. Water color and reflectivity are now able to be specified in the
+  water's XML file.
+
+Framework changes:
+- New physics engine. BEPU Physics has replaces JigLibX. BEPU is still receiving
+  support on their forums, is easier to use, and has more features. This is a fairly large
+  change that required changes to several variables (some new, some removed), so if you're
+  upgrading from a prior version there is a chance that your project may need some changes
+  before you can compile. Most of the changes on your end should be small.
+- New physics viewer, which is much more efficient when rendering.
+- Cylinder physics support. Added physics to the cylinder in the demo scene.
+- Added support for cone physics and a cone render primitive shape. Added a cone to the demo
+  scene to show this.
+
+======================================================================================
+Changes in v0.263 (from previous version 0.262)
+
+Bugs fixed:
+- Terrain color for non-normal-mapped terrain should now match that of normal mapped
+  terrain.
+
+Features:
+- Terrain that is far enough from the camera will no longer be normal mapped. It's
+  an unnoticeable change that will result in a higher framerate for video cards that are
+  pixel-bound.
+- Primitive shape dimensions can now be passed in when creating Render models. This is
+  fully supported from both C# or XML.
+- Cube Primitives now support non-uniform scale, allowing for rectangular cubes. The
+  trigger cubes in the demo have been changed to rectangles to show this.
+
+Framework changes:
+- Rather than using radius as a dimension parameter for physics, the engine is now using
+  diameter instead. This is in line with render primitives which use diameter already.
+  If you're upgrading from a previous version of the engine you'll need to update your
+  render component definition XML files to include dimension parameters. You can reference
+  the demo project on how to do this.
+
+======================================================================================
+Changes in v0.262 (from previous version 0.261)
+
+======================================================================================
+Changes in v0.261 (from previous version 0.26)
+
+Bugs fixed:
+- Fixed a crash in the GUI Framework. This looks to be a bug in the framework that is
+  unrelated to the QuickStart Engine. I've provided the .dlls for this fix to Nuclex
+  if they would like to reference it:
+  http://nuclexframework.codeplex.com/workitem/6662
+
+Features:
+- Implemented a physics picking system. Allows users to click on physics bodies in the
+  game and have the engine know what they've clicked on.
+
+
+======================================================================================
+Changes in v0.26 (from previous version 0.25)
+
+Bugs fixed:
+- Partial fix for a bug that would cause the game window to retain control of the mouse 
+  cursor and react to mouse input even if another window had focus. This would usually
+  only occur if another window was selected right as the game was starting up. This can
+  still occur but it's less likely than before.
+- Engine will no longer crash if the physics viewer tries to render more than 1045575
+  primitives in a single draw call, the draw call is now broken up into multiple smaller
+  draw calls.
+- BaseManagers that had 'Enabled' set to false would still get Update() calls, this no
+  longer happens.
+- BaseManager's 'Enabled' accessor will now properly allow 'setting' to false.
+- Fixed a bug that would cause non-dynamic box physics shapes to not properly line up with
+  the entity's render mesh.
+
+Features:
+- QuickStart Engine now has a GUI implementation, utilizing the Nuclex GUI Framework
+  (version r1404)!
+	- Expanded Nuclex GUI functionality:
+	- Control, ClickableControl, and DraggableControl now recognize double-clicking.
+	- The window gui renderer now renders a seperate window image when the window is
+	  rolled over while draggable, and another image while being dragged.
+	- New WindowControl that supports minimizing, called MinimizableWindowControl.
+	- ButtonControl now supports automatic unfocusing of a button after a button
+	  press. This keeps the button from remaining highlighted after a press.
+- Engine should now be more friendly with mouse control, no longer forcing the cursor 
+  position if the cursor is visible. And when the cursor becomes visible it will now 
+  return the mouse cursor to the position it was last visible at.
+
+Misc:
+- Exposed method to QSGame class to toggle mouse cursor visibility.
+- Optimized physics rendering shape creation so framerate will be better when 
+- All managers and systems in QSGame now reside within an XNA.GameServicesContainer. This
+  will help keep the QSGame class from growing too large and becoming quite as coupled.
+  Additionally this makes it easier to access services within your game if you choose to
+  use it directly, indirectly you can setup accessors to each type in the container from
+  within your own class derived from QSGame.
+- Renamed JigLibDebugger to PhysicsRenderManager
+- PhysicsRenderManager is now in the Physics namespace rather than Debugging and was moved
+  from the base project folder into the 'Physics' folder.
+- SceneManager and PhysicsRenderManager are now derived from BaseManager and load via the
+  ConfigurationManager and Configuration.XML file.
+- Removed QuickStart.Physics.JigLibX project, moved code from that project to the main
+  project, under Physics/JigLibXWrapper
+
+
+======================================================================================
+Changes in v0.25 (from previous version 0.241)
+
+Bugs fixed:
+- Characters should now properly experience gravity while moving.
+- Multiple messages handled in BaseEntity of 'Broadcast' protocol were being sent twice,
+  sometimes causing issues with entities and their components. For example, collision
+  effects, like the pushing volumes in the sample demo, pushed harder at higher framerates,
+  no the push effect should be consistant at any framerate.
+- At high framerates phantom collision volumes were uncolliding and recolliding with
+  physics bodies that were within them. This was happening due to the collisions being
+  checked at a higher rate than they were occurring.
+- Fog color for meshes using the 'ColorNoTexture.fx' effect file was incorrect when
+  underwater.
+- Meshes using the 'NormalMapSpecular.fx' effect file will now receive fog correctly
+  (except when underwater).
+- Calls to BaseComponent.ActivateComponent or DeactivateComponent during a component's
+  update/fixedupdate() call	 could crash the engine. This should no longer be the case.
+- Fixed crash upon calling CollisionTriggerComponent.RemoveAllEffectsOfType().
+- Fixed bug that was preventing 1 of the physics bodies in a scene to not be part of 
+  a physics island, which could hurt performance.
+- FreeCameraInputComponent now properly yaws the camera when it is upside down relative
+  to default 'up' axis.
+
+Features:
+- New WaterPhysicsComponent gives physics to a plane of water, and applies bouyancy
+  properties and drag to an entity moving through the water.
+- A new 'FixedUpdate' method goes to all entities and components that are active. This
+  method is only called after a physics frame update has processed. This means that 
+  anything you handle in 'FixedUpdate' is in sync with the physics frames.
+- BaseEntity will now let the SceneManager know when all of its components are deactivated,
+  or when a first component is activated, and the SceneManager will now keep track of
+  all activated entities and only call Update on those. All components have been updated
+  to only be activated when they absolutely need to. This will help performance and the
+  entities in a scene grows by lessening the number of Update() calls to entities and
+  components.
+- Phantom physics meshes can now have their positions and rotations changed and will
+  properly collide after doing so. Previously they could move but they would only collide
+  from their initial positions.
+- Primitive shapes no longer have to be uniformly scaled on each axis. For example you can
+  now make a box that is not a cube, so it could be twice as tall as it is wide if you wanted.
+- Primitive shape dimensions can now be specified from XML definition files.
+- Exposed 'ApplyLocalTransform' method from JigLibX to the engine, allowing you to create
+  physics shapes that aren't centered at the bottom of the shape.
+- Messages now return whether or not they were handled. If they return false the entity
+  referenced by your entityID is no longer in the scene.
+- Create new messages to get the density and bounding box for a physics actor.
+- MessageType class is now an enum, which will prevent users from creating messages with 
+  message IDs that are already in use. This also allows the enum's ToString method to be
+  used so you can output the name of a message type if you so choose. The downside to 
+  this method is that you must now create new messages by adding to the enum located 
+  in the Engine, rather than your own project.
+- Game messages MsgPhysicsBodyActivated and MsgPhysicsBodyDeactivated are now sent to
+  an entity when it's physics body activates or deactivated.
+
+Misc:
+- Moved QuickStart Logo and Instructions Screen to the Sample Project so they will not
+  appear on any custom projects.
+
+======================================================================================
+Changes in v0.241 (from previous version 0.24)
+
+Known bugs:
+- DX9 video cards will not see shadow mapping or self-shadowing, it has been intentionally
+  disabled because the XNA team intentionally and artificially crippled DX9 support in
+  XNA 4.0. You can re-enable it (but it will have artifacts), by going to GraphicsSettings.cs
+  and search the bottom of the file for 'EnableShadowMapping = false', and comment that line out.
+- Shadow quality when shadows are enabled and graphics level is set to 'highest' is now
+  artificially limited by XNA 4.0 to 1/4 the quality it previously was.
+
+Bugs fixed:
+- Terrain rendering once again handles most DX9 video cards properly, XNA 4.0 made
+  changes to the way DX9 cards can use index buffers, which broke terrain rendering.
+- Fixed issue with ColorNoTexture.fx for the technique that occurs when shadows are
+  disabled that prevented it from clipping during water rendering.
+- Fixed issue with Terrain.fx for the MultiTextureNormaled technique not properly
+  responding to clipping planes during reflections. This was causing terrain not to
+  reflect/refract properly when the graphics level was turned up to 'highest'.
+- Fixed issue with normal-mapped-specular meshes not properly reflecting in water.
+- Fixed issue with the 'low' graphics level setting water not reflecting the sky.
+- Fixed issue with the 'med' graphics level setting water doing shoreline calculations,
+  which added expense to rendering. This setting should now be more efficient.
+
+Misc:
+- We now support changing graphics profiles during runtime.
+- Manager classes now listen for and handle UnloadContent().
+- All handlers of LoadContent will now be notified is LoadContent is being called
+  for a second or more times. This allows you to setup things that only happen during
+  the first call to LoadContent.
+
+
+======================================================================================
+Changes in v0.24 (from previous version 0.23)
+
+- Messages now have a new member called 'protocol'. This gives the message properties
+  so that it can not return after being handled by a single source, but also continue
+  on to other components. It also lets the sender and handler know the intent of the
+  message, for example, a SetPosition message has 'Broadcast' type, which means it is
+  going to be broadcasting a change from the sender of the message to any component
+  that is listening. In contrast, a GetPosition message has 'Request' type, which means
+  only a single component should handle the message, and the handler is expected to
+  return new information in the message. And finally there is the 'Accumulate' method, 
+  which allows the user to send the message to multiple components, and each one will
+  have a chance to make changes or add to the data.
+- ViewMatrix, ProjectionMatrix, and ViewFrustum data members in BaseEntity were moved
+  to the CameraComponent class. This will save on memory by not having these exist on
+  every entity, and also will remove clutter from the BaseEntity class. This did
+  cause some changes to the variables passed through various functions, mostly in
+  the GraphicsSystem class.
+- When using the QSGame.QueueMessage method message protocol is enforced, to prevent
+  the user from sending a request message, which would fail because request messages
+  must immediately return results to the caller.
+- Changed the default physics deactivation values for the engine, added constants for
+  this that can be changed based on the game and scale used. This will result in a
+  better framerate when there are lots of dynamic physics objects in a scene.
+- Entities and components now receive a call to a new function called 'AddedToScene',
+  which is called whenever the entity is added to a scene. This allows the entity and
+  components to do things that normally required a game message to be sent, which
+  couldn't be done until an entity was in the scene.
+- LightComponents no longer need to have InitializeLightDirection() called manually
+  on them to properly rotate the light, this is now done automatically within the
+  component.
+- Entities with SkyComponents no longer need to be manually attached to the camera, 
+  they will now handle this on their own.
+- GeometricPrimitiveType enum uses 'Box' now instead of 'Cube', to match the ShapeType
+  enum.
+- Terrain (which was a class derived from BaseEntity) is now TerrainComponent and is
+  derived from BaseComponent. This makes it easier to load Terrain through the new
+  loading method (XML templates).
+- Constant movement component now allows for a constant direction movement, not just
+  sine-wave type of movements.
+- The current render camera is now notified of any changes to graphics settings.
+
+Bug fixes:
+- Light direction shader parameter now has a correct .W value of 1.0 rather than 0.0
+- Cameras will now automatically assume the aspect ratio of the viewport/window rather
+  than defaulting to a specify preset value (unless you explicitly define one).
+
+Features:
+- Entities and Components can now be loaded entirely from XML definition files. This
+  is a large step towards supporting a level editor that can save out entire scenes
+  in a compact format. In the mean time it means that designer types can create
+  entities through XML rather than C#.
+- Multi-sampling anti-aliasing should work once again. Edit your settings.xml and set
+  "IsMultiSampling" to true to use it, but be aware on PC it will generally cut the
+  framerate in half.
+- Texturing and normal mapping now work properly. Demo has been setup with a couple
+  of textured and normal mapped entities.
+- Ability to create physics box and sphere shapes based on the vertices in a model.
+  This allows you take a model and wrap it in box or sphere physics. Previous this
+  only worked with TriangleMesh shapes which are static so their uses are limited.
+- The full component list stored in BaseEntity is now a dictionary with a 'key' of
+  ComponentType. This allows programmers to easily get a component from an Entity
+  for direct access as an alternative to creating and sending game messages.
+- New physics class for Terrain, called TerrainPhysicsComponent. This allowed us
+  to move all heightfield specific physics out of the PhysicsComponent and into
+  its own class. This also makes it easier to load terrain.
+
+======================================================================================
+Changes in v0.23 (from previous version 0.22)
+
+- Now compatible with XNA 4.0 (details about how that was done below)
+- Removed textures that stored the render target results, render targets derived from
+  texture2D in XNA 4.0.
+- Clipping planes are now implemented within the water shader because they were removed
+  from XNA 4.0.
+- Particle system changes because XNA 4.0 removed point sprites. Non-rotating particles
+  are now much more expensive, sadly.
+- Shaders that were making changes to constants were no longer compiling so those
+  shaders had to be altered a bit, sadly this made some of them more expensive. Blame
+  DX10 and DX11 for removing compatibility with these things, XNA team really had no
+  choice but to be compatible with future tech.
+- DepthStencilBuffers were removed from XNA 4.0, so I had to change how shadowmap textures
+  we bound to the shader parameters. This is because before you could clear the buffer
+  and then bind the parameter, but not you cannot clear the buffer so I had to unbind
+  the parameter, then render to the render target, then bind the parameter. Fun stuff.
+
+Bug fixes:
+- VariableBool bindings now work properly.
+- Different shader techniques in the terrain shader had different texture lookups than
+  others, causing discrepencies.
+- The unit_cube and unit_sphere fbx content files included in 0.22 had specific directory
+  layout requirements due to how they were exported with 3DS-max. Rather than fixing those
+  two assets I've instead simply included the geometric primitive code from an XNA sample
+  that Microsoft wrote, no need to have an .fbx file for a primitive (unless you wanted
+  some kind of special transform I guess).
+- Objects whose bounding spheres are entirely above water no longer render in the water
+  refraction. Objects whose bounding spheres still touch water will still exhibit this
+  behavior. This is a common issue with rasterization, I've yet to see a game solve this
+  problem entirely when implementing refraction.
+- UV texturing was at different scales for different terrain shader techniques, this
+  was causing terrain textures to appear differently when viewed through a water plane
+  than when not.
+- Calling the accessor for BaseComponent.active will no longer crash the engine, this was
+  also causing a crash anytime a watch tried to view that variable while attached in
+  Visual Studio.
+- Possible fix to multithreading issue with JibLibX where when adding bodies to the physics
+  world while it was iterating through them in another thread the engine would crash.
+- Sphere and Capsule shapes were treating diameter like a radius, so all physics spheres
+  based on spheres generated at runtime had twice the diameter of the render mesh.
+- Water reflections of the terrain on the underside of the water surface 
+  (when viewing from underwater) were too bright, this is now much closer to what it should
+  be.
+- Removed old PhysX .dlls and their post-build requirement from the engine, they weren't
+  used since v0.19.
+- Input button "held" state was never being released for GamePad buttons, this is now fixed.
+
+Misc:
+- Removed some warnings.
+
+New features:
+- Implemented Microsoft's Geometric Primitives sample into the engine.
+
+Performance improvements (10-30% framerate improvement):
+- We no longer send entities (including terrain) on the back side of a clipping plane to
+  the renderer.
+
+======================================================================================
+Changes in v0.22 (from previous version, 0.21)
+
+** GRAPHICS SYSTEM
+- We now allow for constant/variable of type bool, float2, float3, and texture2D in 
+  materials/shaders.
+- Implemented Graphics detail level settings.
+- Implemented LOD for terrain. Water uses terrain LOD in reflections and refractions.
+  Desired LOD is currently passed with the render pass descriptor, however, only terrain
+  is currently using it.
+- Implemented shadow mapping.
+- ColorNoTexture shader now uses ambient color from environment. ModelColor parameter is
+  used to give color to models that use this shader.
+- All models now have a base color. Eventually this will be combined with vert color
+  and/or texture color.
+- Support for transparency. The alpha value of a model's color is used as opacity. If
+  entity has transparency, it is pushed to the back of the render order to be drawn last.
+  However, we're not yet sorting transparent objects by depth, so it is possible to get
+  transparent objects blocking the view of other transparent objects.
+- Transparency affects shadow intensity as well, you'll notice that semi-transparent objects
+  have lighter shadows.
+
+** WATER PLANES
+- Implemented water planes. Reflection, refraction, and shoreline detection.
+- Fixed bug from v0.182 with refractions occuring when they shouldn't.
+- Water depth fog.
+
+** SHADOW MAPPING
+- Implemented basic shadow mapping.
+
+** PARTICLE SYSTEM
+- Implemented a 3D GPU accelerated particle system (based on XNA Creators Club Sample).
+- Particle types are loaded from XML, allowing for quick creation of new types.
+- Particles will not go underwater.
+
+** TERRAIN
+- Slight optimization to terrain generation.
+- Reduced smoothing amount for terrain in sample, should help slightly with load times.
+- Terrain uses fog differently when underwater, for a water depth effect.
+
+** XML LOADING
+- Graphics, Fog, and particle emitter settings can be loaded from XML.
+
+Details about graphics levels:
+- Highest: Large render targets for shadows, reflections, and refractions
+- High: All options still enabled, but at lower settings than highest, med LOD for 
+        reflections and refractions.
+- Med: No particles in water reflections, low LOD for terrain in reflections, no refractions.
+       No shoreline detection against terrain. No normal mapping for terrain.
+- Low: Water reflects only the sky, and uses a lower resolution render target than the Med setting.
+======================================================================================
+Changes in v0.21 (from previous version, 0.2)
+
+** DEMO
+- You can now press Tab to cycle through each object and attach to each one.
+- Hold the left mouse button and move the mouse to rotate the camera around the
+  attached object.
+- You can press F2 to detach from an entity and switch to a Free Flying Camera at any time.
+- The character controls have been setup to work with an Xbox360 controller (in addition to 
+  keyboard and mouse)
+- The A button on the 360 controller will fire spheres like the spacebar key does when a
+  character is not being controlled.
+- Press 'M' to toggle the currently selected object's physics between movable and immovable.
+
+** PHYSICS
+- Added support for triangle mesh shapes (basically you can form any shape with physics
+  with this, although it is more expensive than a primitive shape).
+- Physics simulation now runs using a fixed 60hz timestep. This will prevent things like
+  stacks of boxes from jittering like crazy and sometimes falling over when the simulation
+  starts. If framerate drops consistantly below 60fps the simulation can step multiple times
+  during a single game loop to maintain consistancy.
+- We now support loading a model for physics use. This allows an entity to have a triangle
+  mesh physics shape without having any render component whatsoever. This is great for
+  custom shape invisible triggers. Or an invisible custom shaped physics blocker.
+- Added support for toggling physics from movable/unmovable at anytime.
+- Shutting down entities was not removing their physics from the physics simulation. This
+  has been fixed.
+- Upgraded to the latest JigLibX changelist, which adds some optimizations to physics, and
+  helps with garbage collecting a bit. A quick test revealed about a 5-10% drop in garbage
+  created per second for the whole QS Engine. As it stands, most of our garbage right now is
+  still coming from JigLibX.
+- Implemented very basic character physics.
+- Fixed bug with rotations of physics shapes.
+- Fixed rare bug in which the engine would crash if the physics thread were stepping through
+  the scene's physics bodies at the time when a new body was being loaded.
+
+** CHARACTER CONTROLLER
+- Added a controller for 'character' type movement. Character controller is still in a very
+  basic state. Characters do not currently respond to collision triggers.
+- Character controls are as follows:
+	- Keyboard: W,A,S,D for linear movement. Spacebar to jump.
+                    Hold left mouse button and move mouse to rotate character.
+        - Gamepad: A button to jump.
+                   Left thumbstick for linear movement. Right thumbstick to rotate character.
+
+** RENDERING
+- Implemented frustum culling for all models. Significantly improves framerate when complex
+  models, or many models, are not in the view frustum. Culling also implemented for the physics
+  viewer.
+- LightEmitterComponent is now actually used to light a scene rather than hard-coded
+  lighting values in each material. Changing one light will affect all shaders. Lighting can
+  also be changed on the fly, as is now shown in the demo.
+- Started work on Shadow Mapping. Shadow map texture is created when shadow mapping
+  setting is enabled, but I haven't integrated shadow mapping into any of the shaders yet.
+  Shadow map setting is disabled by default. Please enable if you feel like doing work on
+  the shaders to get shadow mapping implemented.
+
+** MESSAGING
+- Implemented classes for all existing message types, this will make them easier
+  to use, understand, and will take less space in the code as well.
+- Created a TypeCheck() method in the Message class. This makes checking for improperly
+  sent messages take up 1/3rd the code space, keeping the engine code a little more tidy.
+- Fixed bug in which calling ExecuteMessage directly on an entity derived from BaseEntity would
+  prevent messages from actually making it to the base class. This was happening for messages
+  going to terrain entities that needed to be handled by the base class.
+- Sending a message to the Terrain now requires that you specify its UniqueID in the message.
+  Terrains now register their IDs with the QSGame instance. This allows anything with access
+  to QSGame (and by extension any method that allows you to send a message), to retrieve the 
+  UniqueID of the terrain so that you can send it a message.
+
+** ENTITIES
+- All entities now have names. Naming is useful for debugging, as well as things like showing
+  an entities name to other players as a feature (like MMOs do, or for FPS scoreboards, etc..)
+- Entities now maintain a list of active components. Only active components are updated each
+  frame, which limits how many components need to be updated each frame, saving on CPU cycles.
+  It also allows the user to deactivate a component that they don't want updated.
+
+** MISC
+- The debug info on the main screen now reports the number of render chunks in view. It also
+  reports the name of the object it is attached to, and the name of the current camera.
+- Created equality comparers for all enum types that were being used as dictionary keys,
+  which reduced garbage produced by the engine by a small amount (about 20 bytes/sec).
+  Most garbage produced by the engine after the first 10 seconds is from JigLibX.
+- Fixed bug where a few JigLib files were pointing to the wrong file path. (My fault from
+  v0.2)
+- QuadTree nodes are no longer of BaseEntity type, this saves on memory by a slight amount.
+
+======================================================================================
+Changes in v0.2 (from previous version, 0.196)
+
+- Updated QSEngine to XNA 3.1
+
+** PHYSICS
+- Updated JigLibX (physics engine) to 0.3.1 Beta, was previously 0.2 Beta.
+- No longer officially supporting NVidia PhysX, they're no longer supporting free
+  use of their engine. Will likely be removing it from future version of engine.
+- Added visual debugger to engine to draw physics shapes. Thanks to JigLib for putting
+  this in their sample game.
+- Fixed bug where boxes were getting extents doubled, causing odd behavior with collision
+  between boxes any anything else. Bug was in engine, not JigLibX.
+- Added engine support for setting linear and angular velocity on an entity.
+- Setting position or rotation of an object with physics no longer causes that object
+  to lose all angular and linear velocity.
+- Added support for Capsule geometry.
+- Because it appears JibLibX has no support for reporting when a collision has ended, I've
+  added support directly to the JibLibXActor wrapper class. It keeps track of the
+  differences in collisions between frames, and notifies the physics component of any
+  changes.
+
+** TERRAIN 
+- Made terrain processing more efficient
+	- Index buffer creation is about 10% faster.
+	- Other minor optimizations.
+- Fixed bug that was causing heightmaps and texture splatting to flip the x and z coords
+  of their images.
+
+- Fixed some memory leaks with some of the messages being sent.
+- You can no longer call .Execute on the parent entity from a child class to safely 
+  send the parent a message, it will result in a memory leak. The new way to do this is
+  to just use SendMessage, but stuff the message with the parent entity's ID.
+- Fixed bug that would cause the free camera to slow down at extremely high framerates.
+- Fixed bug that would cause the free camera to move upward if it was facing upward.
+- Wireframe display for Terrain Quadtree Bounding boxes is now supported. Press 'O'
+  to toggle the display for these boxes.
+- Normal mapping in terrain is back and working again.
+- All Entities can now be sent messages directly based on their Unique ID. Before this
+  you had to have a "pointer" to that entity so you could call its ExecuteMessage()
+  function directly. Now, if you have its Unique ID, you can simply put that into the
+  message and it will get routed directly to that entity.
+- You can now send messages directly to specific interfaces by specifying the interface
+  type and calling SendInterfaceMessage().
+- Removed references to physics component from BaseEntity.
+- RenderComponent was hard-coded to use the grass.qsm material, this is no longer the case.
+- Skydomes are back! Missing since the major engine refactor at v0.19
+- Added render ordering. We now render in three steps, things that prefer to render
+  first, then normal (default), then anything marked to render last. This gives us anywhere
+  from 0-10% fps increase when there is a skydome, depending on what hardware is being
+  used and how much sky and other entities are in view, and how they overlap.
+- The scene manager, all interface, and all entities will receive the a call to their
+  shutdown functions when the game shuts down.
+- When an entity is removed from the world they now have shutdown called on them
+  and each of their components. Additionally, physics actors will now remove from
+  the scene when a single entity is removed, not just when the entire game is closed.
+- Added about 25 new messages.
+- Added some basic shaders and materials for simple shapes to use.
+- We no longer force all components to handle initialize, and shutdown. Default behavior
+  will now occur if a component doesn't handle it.
+
+- Began NavMesh code. Very unoptimized, NavMeshChunks currently have no connections. No
+  A* implemented yet, no character controller created yet.

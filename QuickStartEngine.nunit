@@ -1,0 +1,7 @@
+﻿<NUnitProject>
+  <Settings activeconfig="Debug" appbase="target\Windows\Debug" />
+  <Config name="Debug" binpathtype="Auto">
+    <assembly path="UnitTest_MessageSystem.dll" />
+  </Config>
+  <Config name="Release" binpathtype="Auto" />
+</NUnitProject>
